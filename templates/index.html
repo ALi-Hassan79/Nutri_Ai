@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriAI – Personalized Diet Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #22c55e;
+    --green-dark: #16a34a;
+    --green-light: #dcfce7;
+    --green-mid: #86efac;
+    --gray-900: #0f172a;
+    --gray-800: #1e293b;
+    --gray-700: #334155;
+    --gray-500: #64748b;
+    --gray-200: #e2e8f0;
+    --gray-100: #f1f5f9;
+    --white: #ffffff;
+    --sky: #0ea5e9;
+    --orange: #f97316;
+    --red: #ef4444;
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: #0a0f1a;
+    min-height: 100vh;
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ── Background ─────────────────────────────────────── */
+  .bg-mesh {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -5%, rgba(34,197,94,.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(14,165,233,.12) 0%, transparent 60%),
+      #0a0f1a;
+  }
+
+  .content { position: relative; z-index: 1; }
+
+  /* ── Nav ────────────────────────────────────────────── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,15,26,.6);
+  }
+  .logo { font-family: var(--font-head); font-size: 22px; font-weight: 700; }
+  .logo span { color: var(--green); }
+  .nav-tag {
+    font-size: 12px; background: rgba(34,197,94,.15); color: var(--green);
+    padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(34,197,94,.3);
+    font-weight: 600; letter-spacing: .5px;
+  }
+
+  /* ── Hero ───────────────────────────────────────────── */
+  .hero {
+    text-align: center; padding: 70px 20px 50px;
+    max-width: 700px; margin: 0 auto;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.25);
+    color: var(--green-mid); font-size: 13px; font-weight: 600;
+    padding: 6px 16px; border-radius: 30px; margin-bottom: 24px;
+    letter-spacing: .4px;
+  }
+  .hero h1 {
+    font-family: var(--font-head); font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 700; line-height: 1.15; letter-spacing: -.5px;
+  }
+  .hero h1 em { color: var(--green); font-style: normal; }
+  .hero p {
+    margin-top: 16px; color: var(--gray-500); font-size: 17px; line-height: 1.6;
+  }
+
+  /* ── Pipeline visual ────────────────────────────────── */
+  .pipeline {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 6px; padding: 28px 20px; max-width: 900px; margin: 0 auto;
+  }
+  .pipe-step {
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px; padding: 8px 16px; font-size: 12px; font-weight: 600;
+    color: var(--gray-500); letter-spacing: .3px;
+    transition: all .25s;
+  }
+  .pipe-step.active {
+    background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.35);
+    color: var(--green);
+  }
+  .pipe-arrow { color: var(--gray-700); font-size: 14px; }
+
+  /* ── Main layout ────────────────────────────────────── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+
+  .grid-2 { display: grid; grid-template-columns: 360px 1fr; gap: 28px; }
+  @media(max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── Card ───────────────────────────────────────────── */
+  .card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: border-color .25s;
+  }
+  .card:hover { border-color: rgba(34,197,94,.2); }
+
+  .card-title {
+    font-family: var(--font-head); font-size: 15px; font-weight: 700;
+    color: var(--white); margin-bottom: 22px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ── Form ───────────────────────────────────────────── */
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-500);
+    margin-bottom: 7px; letter-spacing: .4px; text-transform: uppercase; }
+  input, select {
+    width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    color: var(--white); font-family: var(--font-body); font-size: 14px;
+    padding: 11px 14px; border-radius: 10px; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+  }
+  select option { background: #1e293b; color: #fff; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ── Button ─────────────────────────────────────────── */
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all .2s; letter-spacing: .2px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff; box-shadow: 0 4px 16px rgba(34,197,94,.3);
+    margin-top: 8px;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(34,197,94,.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  .btn-pdf {
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    color: var(--white); width: auto; padding: 10px 20px; font-size: 13px;
+    border-radius: 10px; margin-top: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-pdf:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+
+  /* ── Results ────────────────────────────────────────── */
+  #results { display: none; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  @media(max-width: 600px) { .metrics-grid { grid-template-columns: repeat(2,1fr); } }
+
+  .metric-card {
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px; padding: 16px; text-align: center;
+    transition: all .2s;
+  }
+  .metric-card:hover { border-color: rgba(34,197,94,.25); }
+  .metric-val { font-family: var(--font-head); font-size: 26px; font-weight: 700; line-height: 1; }
+  .metric-lbl { font-size: 11px; color: var(--gray-500); margin-top: 5px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; }
+
+  /* Body type badge */
+  .body-badge {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 24px;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .body-badge-left { display: flex; align-items: center; gap: 10px; }
+  .body-type-label { font-weight: 700; font-size: 15px; }
+  .confidence { font-size: 12px; color: var(--green); background: rgba(34,197,94,.15);
+    padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+
+  /* Model performance panel */
+  .model-toggle {
+    background: none; border: none; color: var(--sky); font-size: 11px;
+    font-weight: 600; cursor: pointer; padding: 0; font-family: var(--font-body);
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .model-panel {
+    display: none; background: rgba(14,165,233,.06); border: 1px solid rgba(14,165,233,.18);
+    border-radius: 12px; padding: 16px 18px; margin: -12px 0 24px 0;
+  }
+  .model-panel.open { display: block; }
+  .model-stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px; margin-bottom: 14px;
+  }
+  .model-stat { text-align: center; }
+  .model-stat-val { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--sky); }
+  .model-stat-lbl { font-size: 10px; color: var(--gray-500); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+  .fi-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .fi-name { width: 56px; flex-shrink: 0; font-size: 11px; color: var(--gray-500); }
+  .fi-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,.07); border-radius: 3px; overflow: hidden; }
+  .fi-bar { height: 100%; background: var(--sky); border-radius: 3px; }
+  .fi-pct { width: 34px; flex-shrink: 0; font-size: 11px; text-align: right; color: var(--gray-200); }
+  .cm-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
+  .cm-table th, .cm-table td { padding: 4px 6px; text-align: center; color: var(--gray-500); }
+  .cm-table td.diag { background: rgba(34,197,94,.15); color: var(--green); font-weight: 700; border-radius: 4px; }
+  .cm-table td.off { color: var(--gray-200); }
+  .model-note { font-size: 11px; color: var(--gray-500); margin-top: 12px; line-height: 1.5; }
+
+  /* Progress tracker */
+  .progress-input-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .pt-input {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 8px; padding: 9px 12px; color: var(--white); font-family: var(--font-body);
+    font-size: 13px; flex: 1; min-width: 120px;
+  }
+  .pt-input:focus { outline: none; border-color: var(--sky); }
+  .pt-entry-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: rgba(255,255,255,.03); border-radius: 8px; margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .pt-entry-remove {
+    background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; line-height: 1;
+    padding: 0 4px;
+  }
+  .pt-forecast-card {
+    margin-top: 16px; padding: 16px; border-radius: 12px;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+  }
+  .pt-status-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px;
+  }
+  .pt-stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 12px;
+  }
+  .pt-stat-val { font-family: var(--font-head); font-size: 17px; font-weight: 700; }
+  .pt-stat-lbl { font-size: 10px; color: var(--gray-500); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+  .pt-chart-wrap { margin-top: 10px; }
+
+  /* Ask NutriAI chat */
+  .chat-log { max-height: 320px; overflow-y: auto; margin-bottom: 14px; padding-right: 4px; }
+  .chat-msg { margin-bottom: 12px; display: flex; }
+  .chat-msg.user { justify-content: flex-end; }
+  .chat-bubble {
+    max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5;
+  }
+  .chat-msg.user .chat-bubble { background: rgba(14,165,233,.18); border: 1px solid rgba(14,165,233,.3); }
+  .chat-msg.bot .chat-bubble { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+  .chat-intent-tag {
+    display: inline-block; font-size: 9px; font-weight: 700; color: var(--gray-500);
+    text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px;
+  }
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input-row .pt-input { flex: 1; }
+  .chat-suggestions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chat-suggestion {
+    font-size: 11px; padding: 5px 10px; border-radius: 14px; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1); color: var(--gray-500); cursor: pointer;
+  }
+  .chat-suggestion:hover { color: var(--white); border-color: rgba(255,255,255,.25); }
+
+  /* Macro bars */
+  .macro-section { margin-bottom: 24px; }
+  .macro-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; min-width: 0; }
+  .macro-name { width: 70px; flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--gray-500); }
+  .macro-bar-bg { flex: 1; min-width: 0; height: 8px; background: rgba(255,255,255,.07); border-radius: 4px; overflow: hidden; }
+  .macro-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
+  .macro-pct { width: 38px; flex-shrink: 0; font-size: 12px; font-weight: 700; text-align: right; }
+  .macro-g { width: 68px; flex-shrink: 0; font-size: 12px; color: var(--gray-500); text-align: right; white-space: nowrap; }
+
+  /* Weekly plan tabs */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tab {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1);
+    background: transparent; color: var(--gray-500); font-size: 12px;
+    font-weight: 600; cursor: pointer; transition: all .15s;
+    font-family: var(--font-body);
+  }
+  .tab.active {
+    background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.35);
+    color: var(--green);
+  }
+  .tab:hover:not(.active) { border-color: rgba(255,255,255,.2); color: var(--white); }
+
+  .day-plan { display: none; }
+  .day-plan.active { display: block; }
+
+  .meal-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .meal-item:last-child { border-bottom: none; }
+  .meal-icon { font-size: 22px; min-width: 32px; text-align: center; }
+  .meal-info { flex: 1; }
+  .meal-type { font-size: 11px; color: var(--gray-500); font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  .meal-name { font-size: 14px; font-weight: 600; margin-top: 2px; }
+  .meal-macros { font-size: 11px; color: var(--gray-500); margin-top: 3px; }
+  .meal-cal { font-size: 15px; font-weight: 700; color: var(--sky); white-space: nowrap; }
+  .match-badge {
+    font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; margin-left: 8px; letter-spacing: .2px;
+  }
+
+  .day-total {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,.04); border-radius: 10px; padding: 10px 14px;
+    margin-top: 12px; font-size: 13px; font-weight: 600;
+  }
+
+  /* Loader */
+  .loader {
+    display: none; flex-direction: column; align-items: center; gap: 16px;
+    padding: 48px 20px; text-align: center;
+  }
+  .spinner {
+    width: 48px; height: 48px; border: 3px solid rgba(34,197,94,.2);
+    border-top-color: var(--green); border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader p { color: var(--gray-500); font-size: 14px; }
+
+  /* Pulse dots */
+  .dot-pulse { display: flex; gap: 6px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+    animation: pulse 1.2s ease-in-out infinite; }
+  .dot:nth-child(2) { animation-delay: .2s; }
+  .dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes pulse { 0%,80%,100% { opacity:.2; transform: scale(.8); } 40% { opacity:1; transform: scale(1); } }
+
+  /* ── Section label ──────────────────────────────────── */
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--gray-500); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+
+  /* ── Progress bar (weekly cals) ─────────────────────── */
+  .cal-bar-wrap { background: rgba(255,255,255,.07); border-radius: 4px; height: 6px; margin-top: 4px; }
+  .cal-bar { height: 100%; border-radius: 4px; background: var(--green); max-width: 100%; }
+
+  /* ── Tip box ────────────────────────────────────────── */
+  .tip-box {
+    background: rgba(14,165,233,.06); border: 1px solid rgba(14,165,233,.18);
+    border-radius: 12px; padding: 16px 18px; margin-top: 24px; font-size: 13px;
+    color: #7dd3fc; line-height: 1.6;
+  }
+
+  .guidance-card { margin-bottom: 20px; }
+  .guidance-summary {
+    font-size: 14px; line-height: 1.65; color: var(--gray-200); margin-bottom: 16px;
+  }
+  .health-score {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.25);
+    border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;
+  }
+  .health-score-val { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--green); }
+  .priority-list, .habit-list { list-style: none; padding: 0; }
+  .priority-list li, .habit-list li {
+    font-size: 13px; color: var(--gray-200); line-height: 1.55;
+    padding: 8px 0 8px 22px; position: relative; border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .priority-list li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .habit-list li::before { content: '•'; position: absolute; left: 4px; color: var(--sky); }
+  .warning-box {
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+    border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 12px; color: #fca5a5;
+  }
+  .meal-tip { font-size: 11px; color: var(--green-mid); margin-top: 4px; font-style: italic; }
+  .portion-note { font-size: 10px; color: var(--orange); margin-top: 2px; }
+
+  /* scroll */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="content">
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Nutri<span>AI</span></div>
+  <span class="nav-tag">Intelligent Nutrition Advisor</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🧠 Smart Nutrition Engine + ML Insights</div>
+  <h1>Your <em>Personalized</em><br>Nutrition Guide</h1>
+  <p>Enter your stats and preferences — NutriAI calculates your calorie needs, classifies your body composition with ML, builds a balanced 7-day meal plan, and coaches you with actionable guidance.</p>
+</div>
+
+<!-- PIPELINE -->
+<div class="pipeline">
+  <div class="pipe-step" id="p1">📝 User Data</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" id="p2">⚡ Calorie Science</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" id="p3">🤖 ML Classifier</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" id="p4">🎯 Macro Targets</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" id="p5">🥗 Smart Meal Plan</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" id="p6">💡 AI Guidance</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" id="p7">📄 PDF Report</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="grid-2">
+
+    <!-- LEFT: INPUT FORM -->
+    <div>
+      <div class="card">
+        <div class="card-title">⚙️ Your Information</div>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="name" placeholder="e.g. Ahmad Raza">
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label>Age (years)</label>
+            <input type="number" id="age" placeholder="25" min="10" max="100">
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="gender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" id="height" placeholder="175" min="100" max="250">
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight" placeholder="70" min="30" max="300">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Activity Level</label>
+          <select id="activity">
+            <option value="sedentary">😴 Sedentary (desk job, no exercise)</option>
+            <option value="light">🚶 Lightly Active (1-3 days/week)</option>
+            <option value="moderate" selected>🏃 Moderately Active (3-5 days/week)</option>
+            <option value="active">💪 Very Active (6-7 days/week)</option>
+            <option value="very_active">🔥 Extremely Active (2x/day training)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Goal</label>
+          <select id="goal">
+            <option value="lose_weight">⬇️ Lose Weight (−500 kcal/day)</option>
+            <option value="lose_fast">🏋️ Lose Fast (−750 kcal/day)</option>
+            <option value="maintain" selected>⚖️ Maintain Weight</option>
+            <option value="gain_muscle">💪 Build Muscle (+300 kcal/day)</option>
+            <option value="gain_fast">🚀 Bulk Up (+500 kcal/day)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Diet Preference</label>
+          <select id="diet">
+            <option value="omnivore" selected>🍖 Omnivore (all foods)</option>
+            <option value="vegetarian">🥬 Vegetarian</option>
+            <option value="vegan">🌱 Vegan</option>
+            <option value="pescatarian">🐟 Pescatarian</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Cuisine Preference</label>
+          <select id="cuisine">
+            <option value="any" selected>🌍 Any / Mixed</option>
+            <option value="south_asian">🍛 South Asian</option>
+            <option value="western">🥪 Western</option>
+            <option value="mediterranean">🫒 Mediterranean</option>
+            <option value="asian">🍜 Asian</option>
+            <option value="middle_eastern">🧆 Middle Eastern</option>
+            <option value="mexican">🌮 Mexican</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Allergies / Avoid (optional)</label>
+          <select id="allergies" multiple size="4" style="height:auto; min-height:88px;">
+            <option value="dairy">Dairy</option>
+            <option value="gluten">Gluten</option>
+            <option value="nuts">Nuts</option>
+            <option value="eggs">Eggs</option>
+            <option value="shellfish">Shellfish</option>
+            <option value="soy">Soy</option>
+          </select>
+          <div style="font-size:11px;color:var(--gray-500);margin-top:6px;">Hold Ctrl (Windows) to select multiple</div>
+        </div>
+
+        <button class="btn btn-primary" id="analyzeBtn" onclick="runAnalysis()">
+          🚀 Analyze & Generate Plan
+        </button>
+      </div>
+
+      <!-- Info card -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">🧠 How It Works</div>
+        <div style="font-size:13px; color:var(--gray-500); line-height:1.7;">
+          <p style="margin-bottom:8px">① <strong style="color:#fff">Mifflin-St Jeor BMR</strong> + activity multipliers calculate your exact TDEE.</p>
+          <p style="margin-bottom:8px">② A <strong style="color:#fff">Random Forest ML model</strong> classifies body composition from BMI, activity, and age.</p>
+          <p style="margin-bottom:8px">③ A <strong style="color:#fff">smart meal engine</strong> picks balanced meals that match your calories, diet, and cuisine.</p>
+          <p>④ Your <strong style="color:#fff">personal nutrition coach</strong> delivers daily habits, priorities, and a downloadable PDF report.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div>
+
+      <!-- Loader -->
+      <div class="card loader" id="loader">
+        <div class="spinner"></div>
+        <div>
+          <p id="loaderMsg" style="font-size:15px; font-weight:600; color:#fff;">Running ML Analysis...</p>
+          <p style="margin-top:6px">Calculating your personalized plan</p>
+        </div>
+        <div class="dot-pulse">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results">
+
+        <!-- Metrics -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title">📊 Your Health Metrics</div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-val" id="r-bmi" style="color:var(--green)">—</div>
+              <div class="metric-lbl">BMI</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="r-bmr" style="color:var(--sky)">—</div>
+              <div class="metric-lbl">BMR kcal</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="r-tdee" style="color:var(--sky)">—</div>
+              <div class="metric-lbl">TDEE kcal</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="r-target" style="color:var(--green)">—</div>
+              <div class="metric-lbl">Target kcal</div>
+            </div>
+          </div>
+
+          <!-- Body type badge -->
+          <div class="body-badge" id="bodyBadge">
+            <div class="body-badge-left">
+              <span style="font-size:26px" id="bodyEmoji">—</span>
+              <div>
+                <div style="font-size:11px;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Body Composition (ML)</div>
+                <div class="body-type-label" id="bodyType">—</div>
+              </div>
+            </div>
+            <span class="confidence" id="bodyConf">— confidence</span>
+          </div>
+
+          <div style="margin:-16px 0 16px 0">
+            <button class="model-toggle" id="modelToggleBtn" onclick="toggleModelPanel()">View model performance ▾</button>
+          </div>
+          <div class="model-panel" id="modelPanel">
+            <div class="model-stats-grid" id="modelStatsGrid"></div>
+            <div class="section-label" style="margin-bottom:8px">Feature Importance</div>
+            <div id="fiRows"></div>
+            <div class="section-label" style="margin:14px 0 4px 0">Confusion Matrix (test set)</div>
+            <table class="cm-table" id="cmTable"></table>
+            <div class="model-note">
+              The classifier is a Random Forest trained on a simulated population where body-composition
+              category depends on BMI, activity level, and age with realistic noise — not a direct BMI
+              lookup. Metrics above come from a held-out 20% test split plus 5-fold cross-validation, so the
+              accuracy reflects genuine generalization rather than memorized thresholds.
+            </div>
+          </div>
+
+          <!-- Macros -->
+          <div class="section-label">Macro Targets</div>
+          <div class="macro-section">
+            <div class="macro-row">
+              <span class="macro-name">Protein</span>
+              <div class="macro-bar-bg"><div class="macro-bar" id="bar-p" style="background:#22c55e;width:0%"></div></div>
+              <span class="macro-pct" id="pct-p" style="color:#22c55e">—</span>
+              <span class="macro-g" id="g-p">—</span>
+            </div>
+            <div class="macro-row">
+              <span class="macro-name">Carbs</span>
+              <div class="macro-bar-bg"><div class="macro-bar" id="bar-c" style="background:#0ea5e9;width:0%"></div></div>
+              <span class="macro-pct" id="pct-c" style="color:#0ea5e9">—</span>
+              <span class="macro-g" id="g-c">—</span>
+            </div>
+            <div class="macro-row">
+              <span class="macro-name">Fats</span>
+              <div class="macro-bar-bg"><div class="macro-bar" id="bar-f" style="background:#f97316;width:0%"></div></div>
+              <span class="macro-pct" id="pct-f" style="color:#f97316">—</span>
+              <span class="macro-g" id="g-f">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Guidance -->
+        <div class="card guidance-card" id="guidanceCard">
+          <div class="card-title">💡 Your Personal Nutrition Coach</div>
+          <div id="guidanceContent"></div>
+        </div>
+
+        <!-- Weekly Plan -->
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px">
+            <div class="card-title" style="margin-bottom:0">📅 7-Day Meal Plan</div>
+            <button class="btn btn-pdf" id="pdfBtn" onclick="downloadPDF()">
+              📄 Download PDF Report
+            </button>
+          </div>
+
+          <div class="tabs" id="dayTabs"></div>
+          <div id="dayPlans"></div>
+
+          <div class="tip-box" id="tipBox"></div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="card">
+          <div class="card-title">📈 Progress Tracker (ML Forecast)</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px">
+            Log your weight over time and a regression model will project your trend
+            and check it against what your calorie target should produce.
+          </div>
+
+          <div class="progress-input-row">
+            <input type="date" id="pt-date" class="pt-input">
+            <input type="number" id="pt-weight" class="pt-input" placeholder="Weight (kg)" step="0.1">
+            <button class="btn btn-pdf" style="padding:9px 16px" onclick="addWeightEntry()">+ Log Entry</button>
+          </div>
+
+          <div id="pt-entries"></div>
+
+          <button class="btn btn-pdf" style="margin-top:14px" onclick="runForecast()">🔮 Run Forecast</button>
+          <span style="font-size:11px;color:var(--gray-500);margin-left:10px">Entries are saved in this browser only.</span>
+
+          <div id="pt-result"></div>
+        </div>
+
+        <!-- Ask NutriAI (NLP Q&A) -->
+        <div class="card">
+          <div class="card-title">💬 Ask NutriAI</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-bottom:14px">
+            Ask about a specific food, your calorie/protein target, hydration, or for a tip.
+            A small NLP model classifies what you're asking before answering.
+          </div>
+
+          <div class="chat-suggestions">
+            <span class="chat-suggestion" onclick="askSuggested('Can I eat pizza today?')">Can I eat pizza today?</span>
+            <span class="chat-suggestion" onclick="askSuggested('How many calories should I eat?')">Calorie target?</span>
+            <span class="chat-suggestion" onclick="askSuggested('Am I getting enough protein?')">Enough protein?</span>
+            <span class="chat-suggestion" onclick="askSuggested('How much water should I drink?')">Water intake?</span>
+          </div>
+
+          <div class="chat-log" id="chatLog"></div>
+
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" class="pt-input" placeholder="Ask a question…" onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <button class="btn btn-pdf" style="padding:9px 18px" onclick="sendChatMessage()">Send</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Empty state -->
+      <div class="card" id="emptyState" style="text-align:center; padding:60px 20px;">
+        <div style="font-size:48px; margin-bottom:16px">🥗</div>
+        <div style="font-size:17px; font-weight:700; margin-bottom:8px">Ready to Analyze</div>
+        <div style="font-size:14px; color:var(--gray-500)">Fill in your details on the left and click <strong style="color:#fff">Analyze & Generate Plan</strong> to get your personalized diet plan.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+const MEAL_ICONS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' };
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const TIPS = {
+  lose_weight: ['💧 Drink 8-10 glasses of water daily to boost metabolism.','🐌 Eat slowly — it takes 20 min for your brain to feel full.','🥩 Prioritise protein to preserve muscle in a deficit.'],
+  maintain:    ['📊 Track calories 3-4 days/week to stay aware.','😴 Sleep 7-9 hrs — poor sleep increases hunger hormones.','🎯 Balance treats within your weekly budget.'],
+  gain_muscle: ['⚡ Eat within 30 min post-workout to maximise muscle protein synthesis.','🥩 Distribute protein across 4-5 meals for best absorption.','💊 Creatine monohydrate is the most evidence-backed supplement.'],
+};
+const GOAL_FAMILY = {lose_weight:'lose_weight',lose_fast:'lose_weight',maintain:'maintain',gain_muscle:'gain_muscle',gain_fast:'gain_muscle'};
+
+let lastResult = null;
+let activeDay = 0;
+
+const LOADER_MSGS = [
+  'Calculating BMR & TDEE…',
+  'Running ML body classification…',
+  'Matching meals to your preferences…',
+  'Optimizing calories & macros…',
+  'Generating personalized guidance…',
+  'Building your 7-day plan…',
+  'Preparing your report…',
+];
+
+function animatePipeline(step) {
+  for (let i = 1; i <= 7; i++) {
+    document.getElementById('p'+i)?.classList.toggle('active', i <= step);
+  }
+}
+
+async function runAnalysis() {
+  const age = document.getElementById('age').value;
+  const height = document.getElementById('height').value;
+  const weight = document.getElementById('weight').value;
+  if (!age || !height || !weight) {
+    alert('Please fill in Age, Height, and Weight.');
+    return;
+  }
+
+  // Show loader
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  const loader = document.getElementById('loader');
+  loader.style.display = 'flex';
+  document.getElementById('analyzeBtn').disabled = true;
+
+  // Animate pipeline
+  let step = 0;
+  const pipeInterval = setInterval(() => {
+    step++;
+    animatePipeline(step);
+    document.getElementById('loaderMsg').textContent = LOADER_MSGS[Math.min(step-1, LOADER_MSGS.length-1)];
+    if (step >= 7) clearInterval(pipeInterval);
+  }, 450);
+
+  const allergyEl = document.getElementById('allergies');
+  const allergies = Array.from(allergyEl.selectedOptions).map(o => o.value);
+
+  const payload = {
+    name: document.getElementById('name').value || 'User',
+    age, height, weight,
+    gender: document.getElementById('gender').value,
+    activity: document.getElementById('activity').value,
+    goal: document.getElementById('goal').value,
+    diet: document.getElementById('diet').value,
+    cuisine: document.getElementById('cuisine').value,
+    allergies,
+  };
+
+  try {
+    const res = await fetch('/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    lastResult = data.result;
+    clearInterval(pipeInterval);
+    animatePipeline(7);
+    setTimeout(() => renderResults(data.result), 300);
+  } catch(e) {
+    alert('Error: ' + e.message);
+    loader.style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('analyzeBtn').disabled = false;
+    clearInterval(pipeInterval);
+    animatePipeline(0);
+  }
+}
+
+function toggleModelPanel() {
+  const panel = document.getElementById('modelPanel');
+  const btn = document.getElementById('modelToggleBtn');
+  const open = panel.classList.toggle('open');
+  btn.textContent = open ? 'Hide model performance ▴' : 'View model performance ▾';
+}
+
+function renderModelMetrics(mm) {
+  const grid = document.getElementById('modelStatsGrid');
+  const stats = [
+    ['Test Accuracy', mm.test_accuracy + '%'],
+    ['Macro F1', mm.macro_f1 + '%'],
+    ['CV Accuracy', mm.cv_accuracy_mean + '% ± ' + mm.cv_accuracy_std],
+    ['Train / Test', mm.train_size + ' / ' + mm.test_size],
+  ];
+  grid.innerHTML = stats.map(([lbl, val]) => `
+    <div class="model-stat">
+      <div class="model-stat-val">${val}</div>
+      <div class="model-stat-lbl">${lbl}</div>
+    </div>`).join('');
+
+  const fi = mm.feature_importance;
+  const fiRows = document.getElementById('fiRows');
+  fiRows.innerHTML = ['bmi','activity','age'].map(k => `
+    <div class="fi-row">
+      <span class="fi-name">${k}</span>
+      <div class="fi-bar-bg"><div class="fi-bar" style="width:${fi[k]}%"></div></div>
+      <span class="fi-pct">${fi[k]}%</span>
+    </div>`).join('');
+
+  const labels = mm.labels;
+  const cm = mm.confusion_matrix;
+  const table = document.getElementById('cmTable');
+  let html = '<tr><th></th>' + labels.map(l => `<th>${l.split(' ')[0]}</th>`).join('') + '</tr>';
+  cm.forEach((row, i) => {
+    html += `<tr><th style="text-align:right;color:var(--gray-500)">${labels[i].split(' ')[0]}</th>`;
+    row.forEach((val, j) => {
+      html += `<td class="${i === j ? 'diag' : 'off'}">${val}</td>`;
+    });
+    html += '</tr>';
+  });
+  table.innerHTML = html;
+}
+
+function renderResults(r) {
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('analyzeBtn').disabled = false;
+
+  // Metrics
+  document.getElementById('r-bmi').textContent = r.bmi;
+  document.getElementById('r-bmr').textContent = r.bmr.toLocaleString();
+  document.getElementById('r-tdee').textContent = r.tdee.toLocaleString();
+  document.getElementById('r-target').textContent = r.target_calories.toLocaleString();
+
+  // Body type
+  document.getElementById('bodyEmoji').textContent = r.body_type.emoji;
+  document.getElementById('bodyType').textContent = r.body_type.label;
+  document.getElementById('bodyConf').textContent = r.body_type.confidence + '% confidence';
+
+  // Model performance panel
+  if (r.model_metrics) renderModelMetrics(r.model_metrics);
+
+  // Macros
+  const m = r.macros;
+  ['p','c','f'].forEach((k, i) => {
+    const pct = [m.protein_pct, m.carbs_pct, m.fat_pct][i];
+    const g = [m.protein_g, m.carbs_g, m.fat_g][i];
+    const lbl = ['protein','carbs','fat'][i];
+    document.getElementById(`bar-${k}`).style.width = pct + '%';
+    document.getElementById(`pct-${k}`).textContent = pct + '%';
+    document.getElementById(`g-${k}`).textContent = g + 'g ' + lbl;
+  });
+
+  // Guidance
+  if (r.guidance) {
+    const g = r.guidance;
+    let html = `<div class="health-score">
+      <div class="health-score-val">${g.health_score.score}</div>
+      <div><div style="font-weight:700;font-size:14px">Wellness Score: ${g.health_score.label}</div>
+      <div style="font-size:12px;color:var(--gray-500)">Hydration target: ${g.hydration_ml.toLocaleString()} ml/day</div></div>
+    </div>`;
+    html += `<div class="guidance-summary">${g.summary}</div>`;
+    html += `<div class="section-label">Top Priorities</div><ul class="priority-list">`;
+    g.priorities.forEach(p => { html += `<li>${p}</li>`; });
+    html += `</ul><div class="section-label" style="margin-top:14px">Daily Habits</div><ul class="habit-list">`;
+    g.daily_habits.forEach(h => { html += `<li>${h}</li>`; });
+    html += `</ul>`;
+    if (g.warnings && g.warnings.length) {
+      html += g.warnings.map(w => `<div class="warning-box">⚠️ ${w}</div>`).join('');
+    }
+    document.getElementById('guidanceContent').innerHTML = html;
+  }
+
+  // Weekly tabs
+  const tabs = document.getElementById('dayTabs');
+  const plans = document.getElementById('dayPlans');
+  tabs.innerHTML = ''; plans.innerHTML = '';
+
+  r.weekly_plan.forEach((day, idx) => {
+    const tab = document.createElement('button');
+    tab.className = 'tab' + (idx===0?' active':'');
+    tab.textContent = day.day.slice(0,3);
+    tab.onclick = () => switchDay(idx);
+    tabs.appendChild(tab);
+
+    const div = document.createElement('div');
+    div.className = 'day-plan' + (idx===0?' active':'');
+    div.id = 'day-' + idx;
+
+    const mealOrder = ['breakfast','lunch','dinner','snack'];
+    div.innerHTML = mealOrder.map(mt => {
+      const meal = day.meals[mt];
+      const tip = meal.tip ? `<div class="meal-tip">💡 ${meal.tip}</div>` : '';
+      const portion = meal.portion_note ? `<div class="portion-note">${meal.portion_note}</div>` : '';
+      const match = (typeof meal.match_score === 'number')
+        ? (() => {
+            const s = meal.match_score;
+            const color = s >= 70 ? '#22c55e' : s >= 50 ? '#f97316' : '#94a3b8';
+            const bg = s >= 70 ? 'rgba(34,197,94,.12)' : s >= 50 ? 'rgba(249,115,22,.12)' : 'rgba(148,163,184,.12)';
+            return `<span class="match-badge" style="color:${color};background:${bg}" title="ML-ranked fit to your target macro split">${s}% match</span>`;
+          })()
+        : '';
+      return `<div class="meal-item">
+        <div class="meal-icon">${MEAL_ICONS[mt]}</div>
+        <div class="meal-info">
+          <div class="meal-type">${mt} ${match}</div>
+          <div class="meal-name">${meal.name}</div>
+          <div class="meal-macros">P: ${meal.protein}g &nbsp;·&nbsp; C: ${meal.carbs}g &nbsp;·&nbsp; F: ${meal.fat}g</div>
+          ${tip}${portion}
+        </div>
+        <div class="meal-cal">${meal.calories} kcal</div>
+      </div>`;
+    }).join('');
+
+    const diff = day.total_calories - day.target_calories;
+    const pct = Math.min(100, Math.round(day.total_calories / day.target_calories * 100));
+    div.innerHTML += `<div class="day-total">
+      <span>Daily Total: <strong>${day.total_calories.toLocaleString()} kcal</strong> · P:${day.total_protein||'—'}g C:${day.total_carbs||'—'}g F:${day.total_fat||'—'}g</span>
+      <span style="color:${Math.abs(diff)>80?'var(--orange)':'var(--green)'}">
+        ${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)} vs target
+      </span>
+    </div>
+    <div class="cal-bar-wrap"><div class="cal-bar" style="width:${pct}%"></div></div>`;
+
+    plans.appendChild(div);
+  });
+
+  // Tips
+  const family = GOAL_FAMILY[r.user.goal] || 'maintain';
+  const tips = TIPS[family] || [];
+  document.getElementById('tipBox').innerHTML = '<strong style="color:#fff">💡 Tips for your goal:</strong><br><br>' +
+    tips.map(t => `<div style="margin-bottom:6px">${t}</div>`).join('');
+
+  document.getElementById('results').style.display = 'block';
+}
+
+function switchDay(idx) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.day-plan').forEach((d,i) => d.classList.toggle('active', i===idx));
+}
+
+async function downloadPDF() {
+  if (!lastResult) return;
+  const btn = document.getElementById('pdfBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating PDF…';
+  try {
+    const res = await fetch('/download-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ result: lastResult }),
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `NutriAI_Diet_Report_${lastResult.user.name || 'User'}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('PDF error: ' + e.message); }
+  btn.disabled = false;
+  btn.innerHTML = '📄 Download PDF Report';
+}
+
+// ─── Progress Tracker ─────────────────────────────────────────────────────
+
+const PT_STORAGE_KEY = 'nutriai_weight_log';
+
+function ptLoadEntries() {
+  try {
+    const raw = localStorage.getItem(PT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function ptSaveEntries(entries) {
+  localStorage.setItem(PT_STORAGE_KEY, JSON.stringify(entries));
+}
+
+function addWeightEntry() {
+  const dateEl = document.getElementById('pt-date');
+  const weightEl = document.getElementById('pt-weight');
+  const date = dateEl.value;
+  const weight = parseFloat(weightEl.value);
+
+  if (!date || isNaN(weight) || weight <= 0) {
+    alert('Enter a valid date and weight.');
+    return;
+  }
+
+  const entries = ptLoadEntries();
+  if (entries.some(e => e.date === date)) {
+    alert('You already logged an entry for that date.');
+    return;
+  }
+  entries.push({ date, weight });
+  ptSaveEntries(entries);
+  weightEl.value = '';
+  renderPtEntries();
+}
+
+function removePtEntry(date) {
+  let entries = ptLoadEntries();
+  entries = entries.filter(e => e.date !== date);
+  ptSaveEntries(entries);
+  renderPtEntries();
+}
+
+function renderPtEntries() {
+  const entries = ptLoadEntries().sort((a, b) => a.date.localeCompare(b.date));
+  const container = document.getElementById('pt-entries');
+  if (!entries.length) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--gray-500)">No entries logged yet.</div>';
+    return;
+  }
+  container.innerHTML = entries.map(e => `
+    <div class="pt-entry-row">
+      <span>${e.date} — <strong>${e.weight} kg</strong></span>
+      <button class="pt-entry-remove" onclick="removePtEntry('${e.date}')">✕</button>
+    </div>
+  `).join('');
+}
+
+async function runForecast() {
+  const resultBox = document.getElementById('pt-result');
+  const entries = ptLoadEntries().sort((a, b) => a.date.localeCompare(b.date));
+
+  if (!lastResult) {
+    resultBox.innerHTML = `<div class="warning-box">⚠️ Run an analysis first so we know your calorie target.</div>`;
+    return;
+  }
+  if (entries.length < 2) {
+    resultBox.innerHTML = `<div class="warning-box">⚠️ Log at least 2 entries (on different days) to fit a trend.</div>`;
+    return;
+  }
+
+  const firstDate = new Date(entries[0].date);
+  const payloadEntries = entries.map(e => ({
+    day: Math.round((new Date(e.date) - firstDate) / 86400000),
+    weight: e.weight,
+  }));
+
+  resultBox.innerHTML = `<div style="font-size:13px;color:var(--gray-500);margin-top:14px">Running regression…</div>`;
+
+  try {
+    const res = await fetch('/forecast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        entries: payloadEntries,
+        target_calories: lastResult.target_calories,
+        tdee: lastResult.tdee,
+        weeks_ahead: 4,
+      }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    renderForecast(data.forecast, entries);
+  } catch(e) {
+    resultBox.innerHTML = `<div class="warning-box">⚠️ ${e.message}</div>`;
+  }
+}
+
+function renderForecast(f, entries) {
+  const resultBox = document.getElementById('pt-result');
+  const badgeColor = f.on_track ? 'var(--green)' : 'var(--orange)';
+  const badgeBg = f.on_track ? 'rgba(34,197,94,.15)' : 'rgba(249,115,22,.15)';
+  const badgeText = f.on_track ? '✅ On Track' : '⚠️ Off Track';
+
+  const stats = [
+    ['Current', f.current_weight + ' kg'],
+    ['Trend', (f.slope_kg_per_week >= 0 ? '+' : '') + f.slope_kg_per_week + ' kg/wk'],
+    ['Expected', (f.expected_kg_per_week >= 0 ? '+' : '') + f.expected_kg_per_week + ' kg/wk'],
+    ['In ' + f.weeks_ahead + ' wks', f.projected_weight + ' kg'],
+  ];
+  if (f.r2 !== null) stats.push(['Fit (R²)', f.r2]);
+
+  resultBox.innerHTML = `
+    <div class="pt-forecast-card">
+      <span class="pt-status-badge" style="color:${badgeColor};background:${badgeBg}">${badgeText}</span>
+      <div style="font-size:13px;margin-bottom:14px">${f.status}</div>
+      <div class="pt-stats-grid">
+        ${stats.map(([lbl, val]) => `
+          <div>
+            <div class="pt-stat-val">${val}</div>
+            <div class="pt-stat-lbl">${lbl}</div>
+          </div>`).join('')}
+      </div>
+      <div class="pt-chart-wrap">${ptSparkline(entries, f)}</div>
+    </div>
+  `;
+}
+
+function ptSparkline(entries, f) {
+  const w = 560, h = 120, pad = 24;
+  const firstDate = new Date(entries[0].date);
+  const points = entries.map(e => ({
+    x: Math.round((new Date(e.date) - firstDate) / 86400000),
+    y: e.weight,
+  }));
+  const projX = points[points.length - 1].x + f.weeks_ahead * 7;
+  const allX = points.map(p => p.x).concat([projX]);
+  const allY = points.map(p => p.y).concat([f.projected_weight]);
+  const minX = Math.min(...allX), maxX = Math.max(...allX);
+  const minY = Math.min(...allY) - 0.5, maxY = Math.max(...allY) + 0.5;
+
+  const sx = x => pad + (x - minX) / (maxX - minX || 1) * (w - pad * 2);
+  const sy = y => h - pad - (y - minY) / (maxY - minY || 1) * (h - pad * 2);
+
+  const linePts = points.map(p => `${sx(p.x)},${sy(p.y)}`).join(' ');
+  const lastP = points[points.length - 1];
+  const projLine = `${sx(lastP.x)},${sy(lastP.y)} ${sx(projX)},${sy(f.projected_weight)}`;
+  const dots = points.map(p => `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="3" fill="#0ea5e9"/>`).join('');
+
+  return `
+    <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px">
+      <polyline points="${linePts}" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+      <polyline points="${projLine}" fill="none" stroke="#22c55e" stroke-width="2" stroke-dasharray="4,4"/>
+      ${dots}
+      <circle cx="${sx(projX)}" cy="${sy(f.projected_weight)}" r="4" fill="#22c55e"/>
+    </svg>
+    <div style="font-size:10px;color:var(--gray-500);margin-top:2px">Solid: logged weight · Dashed: projected trend</div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderPtEntries();
+  document.getElementById('pt-date').valueAsDate = new Date();
+});
+
+// ─── Ask NutriAI (NLP Q&A) ─────────────────────────────────────────────────
+
+function askSuggested(text) {
+  document.getElementById('chat-input').value = text;
+  sendChatMessage();
+}
+
+function appendChatMessage(role, html, intentTag) {
+  const log = document.getElementById('chatLog');
+  const tag = intentTag ? `<div class="chat-intent-tag">${intentTag}</div>` : '';
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + role;
+  msg.innerHTML = `<div class="chat-bubble">${tag}${html}</div>`;
+  log.appendChild(msg);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = '';
+
+  appendChatMessage('user', question);
+
+  const context = lastResult ? {
+    goal: lastResult.user.goal,
+    target_calories: lastResult.target_calories,
+    tdee: lastResult.tdee,
+    macros: lastResult.macros,
+    hydration_ml: lastResult.guidance ? lastResult.guidance.hydration_ml : null,
+    daily_habits: lastResult.guidance ? lastResult.guidance.daily_habits : [],
+  } : {};
+
+  try {
+    const res = await fetch('/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, context }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    const tag = `${data.intent.replace('_',' ')} · ${data.confidence}% confidence`;
+    appendChatMessage('bot', data.answer, tag);
+  } catch(e) {
+    appendChatMessage('bot', `⚠️ ${e.message}`);
+  }
+}
+</script>
+</body>
+</html>
